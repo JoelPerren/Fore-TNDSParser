@@ -32,7 +32,7 @@ def get_service_information():
 		"Mode" : service.find('tnds:Mode', NS).text,
 		"Service Code" : service.find('tnds:ServiceCode', NS).text,
 		"Line Name" : service.find('tnds:Lines/tnds:Line/tnds:LineName', NS).text,
-		"Operator": service.find('tnds:RegisteredOperatorRef', NS).text,
+		"Operator": root.find('tnds:Operators/tnds:Operator/tnds:OperatorShortName', NS).text,
 		"Descirption": service.find('tnds:Description', NS).text
 	}
 
@@ -99,4 +99,3 @@ def organise_journeys(journeys):
 
 	return results
 
-print(organise_journeys(get_all_journeys()))
