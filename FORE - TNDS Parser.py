@@ -10,10 +10,13 @@
 import os
 import xml.etree.ElementTree as et
 import time
+import csv
+import datetime
 from operator import itemgetter
 
-XML_PATH = "C:\\Users\\Joel.Perren\\Documents\\Traveline Data\\TransXChange\\XML\\Yorkshire\\SVRYWAO034.xml"
+XML_PATH = "C:\\Users\\joelp\\Documents\\GitHub\\Fore-TNDSParser\\SVRYWAO049.xml"
 NS = {"tnds": "http://www.transxchange.org.uk/"}
+OUTPUT_DIR = "C:\\Users\\joelp\\Documents\\GitHub\\Fore-TNDSParser\\"
 
 #------------------------------------------------------------------------------
 # Main Script
@@ -29,11 +32,11 @@ def get_service_information():
 		return None
 
 	service_info = {
-		"Mode" : service.find('tnds:Mode', NS).text,
+		"Mode"         : service.find('tnds:Mode', NS).text,
 		"Service Code" : service.find('tnds:ServiceCode', NS).text,
-		"Line Name" : service.find('tnds:Lines/tnds:Line/tnds:LineName', NS).text,
-		"Operator": root.find('tnds:Operators/tnds:Operator/tnds:OperatorShortName', NS).text,
-		"Descirption": service.find('tnds:Description', NS).text
+		"Line Name"    : service.find('tnds:Lines/tnds:Line/tnds:LineName', NS).text,
+		"Operator"     : root.find('tnds:Operators/tnds:Operator/tnds:OperatorShortName', NS).text,
+		"Description"  : service.find('tnds:Description', NS).text
 	}
 
 	return service_info
@@ -49,10 +52,10 @@ def get_all_journeys():
 		direction = root.find("tnds:JourneyPatternSections/*[@id='{}']/tnds:JourneyPatternTimingLink/tnds:Direction".format(journey_pattern), NS).text
 
 		journey_object = {
-			"time": departure_time,
+			"time"              : departure_time,
 			"operating_profile" : operating_profile,
-			"journey_pattern" : journey_pattern,
-			"direction": direction,
+			"journey_pattern"   : journey_pattern,
+			"direction"         : direction,
 		}
 
 		vehicle_journeys.append(journey_object)
@@ -89,9 +92,9 @@ def organise_journeys(journeys):
 
 	for direction in unique_directions:
 		results[direction] = {
-			"weekday": [],
-			"saturday": [],
-			"sunday": [],
+			"weekday"  : [],
+			"saturday" : [],
+			"sunday"   : [],
 		}
 
 	for journey in sorted_journeys:
@@ -99,3 +102,56 @@ def organise_journeys(journeys):
 
 	return results
 
+def get_stops_from_journey_pattern(journey_pattern_ref):
+	journey_pattern = root.find("tnds:JourneyPatternSections/*[@id='{}']".format(journey_pattern_ref), NS)
+	results = []
+
+	for link in journey_pattern:
+		journey_link = {
+			"To"            : link.find('tnds:To/tnds:StopPointRef', NS).text,
+			"From"          : link.find('tnds:From/tnds:StopPointRef', NS).text,
+			"Duration"      : link.find('tnds:RunTime', NS).text.strip('PTS'),
+			"Timing Status" : link.find('tnds:From/tnds:TimingStatus', NS).text,
+		}
+
+		results.append(journey_link)
+
+	return results
+
+def write_results(schedule):
+	organised_journeys = organise_journeys(get_all_journeys())
+	service_info = get_service_information()
+
+	for direction in organised_journeys:
+		csvfile = open("{}{} {} ({}).csv". format(OUTPUT_DIR, service_info['Line Name'], direction, schedule), 'w', newline='')
+		csvwriter = csv.writer(csvfile, delimiter = ',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+		csvwriter.writerow(["{} {} ({})".format(service_info['Line Name'], service_info['Description'], direction)])
+
+		for journey in organised_journeys[direction][schedule]:
+			line = []
+			start_time = journey[0]
+			current_time = start_time
+			# line.append(start_time)
+			journey_pattern = get_stops_from_journey_pattern(journey[1])
+			first = True
+
+			for link in journey_pattern:
+				if (first):
+					line.append("{} ({})".format(link['From'], current_time))
+					first = False
+				
+				current_time = add_seconds(current_time, link['Duration'])
+				line.append("{} ({})".format(link['To'], current_time))
+
+			csvwriter.writerow(line)
+
+		csvfile.close()
+
+def add_seconds(strtime, secs):
+	time = datetime.datetime.strptime(strtime, '%H:%M:%S')
+	fulldate = datetime.datetime(100, 1, 1, time.hour, time.minute, time.second)
+	fulldate = fulldate + datetime.timedelta(seconds=int(secs))
+	return fulldate.time().strftime('%H:%M:%S')
+
+write_results("weekday")
+# print(get_stops_from_journey_pattern('JPS_YWAO049-153'))
