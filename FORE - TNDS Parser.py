@@ -1,6 +1,5 @@
 #------------------------------------------------------------------------------
 # A tool to parse TNDS and return the bus route and timetabling data
-# Requires Python 3 (e.g. py -3 "path_to_.py file")
 # (c) Joel Perren (Fore Consulting Limited) 2019
 #------------------------------------------------------------------------------
 
@@ -164,8 +163,11 @@ for file in os.listdir(XML_PATH):
 user_input = input("Enter operating profile ('weekday', 'saturday', or 'sunday'): ").lower()
 
 for file in xml_files:
-	tree = et.parse("{}\\{}".format(XML_PATH, file))
-	root = tree.getroot()
-	write_results(user_input)
+	try:
+		tree = et.parse("{}\\{}".format(XML_PATH, file))
+		root = tree.getroot()
+		write_results(user_input)
+	except:
+		print("Cannot parse {}. Skipping.".format(file))
 
 print("Success")
