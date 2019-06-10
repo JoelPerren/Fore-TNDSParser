@@ -1,5 +1,6 @@
 #------------------------------------------------------------------------------
 # A tool to parse TNDS and return the bus route and timetabling data
+# Requires Python 3 (e.g. py -3 "path_to_.py file")
 # (c) Joel Perren (Fore Consulting Limited) 2019
 #------------------------------------------------------------------------------
 
@@ -14,16 +15,13 @@ import csv
 import datetime
 from operator import itemgetter
 
-XML_PATH = "C:\\Users\\joelp\\Documents\\GitHub\\Fore-TNDSParser\\SVRYWAO049.xml"
+XML_PATH = "C:\\Users\\Joel.Perren\\Documents\\Traveline Data\\TransXChange\\Wakefield Aimsun Model\\XML"
 NS = {"tnds": "http://www.transxchange.org.uk/"}
-OUTPUT_DIR = "C:\\Users\\joelp\\Documents\\GitHub\\Fore-TNDSParser\\"
+OUTPUT_DIR = "C:\\Users\\Joel.Perren\\Documents\\Traveline Data\\TransXChange\\Wakefield Aimsun Model\\CSV\\"
 
 #------------------------------------------------------------------------------
-# Main Script
+# Function Definitions
 #------------------------------------------------------------------------------
-
-tree = et.parse(XML_PATH)
-root = tree.getroot()
 
 def get_service_information():
 	service = root.find('tnds:Services/tnds:Service', NS)
@@ -153,5 +151,21 @@ def add_seconds(strtime, secs):
 	fulldate = fulldate + datetime.timedelta(seconds=int(secs))
 	return fulldate.time().strftime('%H:%M:%S')
 
-write_results("weekday")
-# print(get_stops_from_journey_pattern('JPS_YWAO049-153'))
+#------------------------------------------------------------------------------
+# Main Script
+#------------------------------------------------------------------------------
+
+xml_files = []
+
+for file in os.listdir(XML_PATH):
+	if file.endswith(".xml"):
+		xml_files.append(file)
+
+user_input = input("Enter operating profile ('weekday', 'saturday', or 'sunday'): ").lower()
+
+for file in xml_files:
+	tree = et.parse("{}\\{}".format(XML_PATH, file))
+	root = tree.getroot()
+	write_results(user_input)
+
+print("Success")
