@@ -3,6 +3,7 @@ A tool to parse TNDS .xml files and return the associated route and timetabling 
 
 ## Traveline National Dataset (TNDS)
 The Traveline National Dataset contains public transport timetables for bus services in Great Britain.
+
 See https://data.gov.uk/dataset/0447f8d9-8f1b-4a68-bbc8-246981d02256/traveline-national-dataset for more information.
 
 ## Inputs
@@ -15,4 +16,5 @@ Each row of a given .csv file represents one vehicle journey in the timetable. E
 
 ## Usage
 Run the script using Python 3.
+
 *Python "Fore - TNDS Parser.py"*
