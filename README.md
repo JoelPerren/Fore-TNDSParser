@@ -17,4 +17,4 @@ Each row of a given .csv file represents one vehicle journey in the timetable. E
 ## Usage
 Run the script using Python 3.
 
-*Python "Fore - TNDS Parser.py"*
+*Python Fore-TNDSParser.py*
