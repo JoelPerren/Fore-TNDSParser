@@ -15,6 +15,8 @@ In the directory specified by the 'OUTPUT' global variable the script writes a .
 Each row of a given .csv file represents one vehicle journey in the timetable. Each cell of the row contains the ATCO Code of a bus stop and the time at which the bus is scheduled to arrive at the bus stop in parenthesis.
 
 ## Usage
+Edit the XML and OUTPUT global variables to the correct file paths. XML should point to the folder containing the .xml files to be parsed; OUTPUT should point to the folder where the .csv files should be written. 
+
 Run the script using Python 3.
 
 *Python Fore-TNDSParser.py*
